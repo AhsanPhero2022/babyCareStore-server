@@ -36,6 +36,18 @@ async function run() {
       res.send(result);
     });
  
+    app.get("/category", async (req, res) => {
+      const result = await collection.find().toArray();
+      
+    
+      result.sort((a, b) => {
+        if (a.category < b.category) return -1;
+        if (a.category > b.category) return 1;
+        return 0;
+      });
+      
+      res.send(result);
+    });
 
     app.listen(port, () => {
       console.log(`Server is running on http://localhost:${port}`);
