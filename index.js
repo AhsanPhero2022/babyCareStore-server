@@ -51,6 +51,34 @@ async function run() {
       });
     });
 
+    // User Login
+    app.post("/api/v1/login", async (req, res) => {
+      const { email, password } = req.body;
+
+      // Find user by email
+      const user = await collection.findOne({ email });
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Compare hashed password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
+        expiresIn: process.env.EXPIRES_IN,
+      });
+
+      res.json({
+        success: true,
+        message: "Login successful",
+        token,
+      });
+    });
+
     app.get("/products", async (req, res) => {
       const result = await collection.find().toArray();
       res.send(result);
