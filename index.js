@@ -1,14 +1,19 @@
 const express = require("express");
 const cors = require("cors");
-
-const { MongoClient, ObjectId } = require("mongodb");
+const { MongoClient } = require("mongodb");
 require("dotenv").config();
-
 const app = express();
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(
+  cors({
+    origin: "https://baby-care-store-next-js-client-dun.vercel.app",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const uri = process.env.MONGODB_URI;
@@ -20,11 +25,13 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect to MongoDB
-    // await client.connect();
+    await client.connect();
     console.log("Connected to MongoDB");
 
     const db = client.db("ass8");
-    const collection = db.collection("products");
+    const productsCollection = db.collection("products");
+
+    const collection = db.collection("users");
 
     // User Registration
     app.post("/api/v1/register", async (req, res) => {
@@ -80,12 +87,12 @@ async function run() {
     });
 
     app.get("/products", async (req, res) => {
-      const result = await collection.find().toArray();
+      const result = await productsCollection.find().toArray();
       res.send(result);
     });
 
     app.get("/category", async (req, res) => {
-      const result = await collection.find().toArray();
+      const result = await productsCollection.find().toArray();
 
       result.sort((a, b) => {
         if (a.category < b.category) return -1;
